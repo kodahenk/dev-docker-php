@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./docker/apache
+    container_name: symfony34-web
+    volumes:
+      - ./symfony:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: ./docker/mysql
+    container_name: symfony34-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf # Optional
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    build:
+      context: ./docker/phpmyadmin
+    container_name: symfony34-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
